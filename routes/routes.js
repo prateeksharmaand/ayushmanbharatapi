@@ -41,7 +41,7 @@ const fs = require('fs')
 
 const medicalrecord = require('../models/medicalrecord');
 const { TextAnalyticsClient, AzureKeyCredential } = require("@azure/ai-text-analytics");
-const client = new TextAnalyticsClient("https://ayushmedicaltestentity.cognitiveservices.azure.com/", new AzureKeyCredential("cd6f3c2b664140b28021da2313b2d050"));
+const client = new TextAnalyticsClient("https://ayushmedicaltestentitys.cognitiveservices.azure.com/", new AzureKeyCredential("38ef59bdbdc046d5b4249b8886b509fb"));
 
 const { FormRecognizerClient } = require("@azure/ai-form-recognizer");
 const { ComputerVisionClient } = require("@azure/cognitiveservices-computervision");
@@ -50,8 +50,8 @@ const vitalDetails = require('../models/vitalDetails');
 const laborderdetails = require('../models/laborderdetails');
 var upload = multer({
   storage: multerAzure({
-    account: 'poacdocreport', //The name of the Azure storage account
-    key: 'EP8FxGYIqd4Z8qEqypUNrNcz65IPisC7lXDV7Qi8jyQkfIn4Vk3g+4fX01fVD+CmmtwpWRsKSM/Hn2hcJ35iNg==', //A key listed under Access keys in the storage account pane
+    account: 'poacdocreports', //The name of the Azure storage account
+    key: 'G4Pobr5f7uU5B/t9n93ZyosDDzS+jo50ocZM+yPpJmMkUkVV19eQDLLANHoVQbniic4zA6Tmir/B+ASt89+iLQ==', //A key listed under Access keys in the storage account pane
     container: 'reports',  //Any container name, it will be created if it doesn't exist
     blobPathResolver: function (req, file, callback) {
       var blobPath = GetRandomId(1080, 800000) + ".pdf"
@@ -61,8 +61,8 @@ var upload = multer({
 })
 var uploadimage = multer({
   storage: multerAzure({
-    account: 'poacdocreport', //The name of the Azure storage account
-    key: 'EP8FxGYIqd4Z8qEqypUNrNcz65IPisC7lXDV7Qi8jyQkfIn4Vk3g+4fX01fVD+CmmtwpWRsKSM/Hn2hcJ35iNg==', //A key listed under Access keys in the storage account pane
+    account: 'poacdocreports', //The name of the Azure storage account
+    key: 'G4Pobr5f7uU5B/t9n93ZyosDDzS+jo50ocZM+yPpJmMkUkVV19eQDLLANHoVQbniic4zA6Tmir/B+ASt89+iLQ==', //A key listed under Access keys in the storage account pane
     container: 'reports',  //Any container name, it will be created if it doesn't exist
     blobPathResolver: function (req, file, callback) {
       var blobPath = GetRandomId(1080, 800000) + ".jpg"
@@ -652,8 +652,8 @@ router.post('/fileupload', upload.single("file"), async function (req, res, next
   res.json(success("Record Saved! We will update once Smart Report Gets Generated", { data: 1 }, res.statusCode))
   var printedTextSampleURL = req.file.url; // pdf/jpeg/png/tiff formats
 
-  const computerVisionKey = "f2dbc76f58874d1b8c87110eaefc55de";
-  const computerVisionEndPoint = "https://ayushmanocrdetectionpdf.cognitiveservices.azure.com/";
+  const computerVisionKey = "817c78b1b5d042f2a9077eb345ff7c96";
+  const computerVisionEndPoint = "https://ayushmanocrdetectionpdfs.cognitiveservices.azure.com/";
   const cognitiveServiceCredentials = new CognitiveServicesCredentials(computerVisionKey);
   const computerVisionClient = new ComputerVisionClient(cognitiveServiceCredentials, computerVisionEndPoint);
 
@@ -676,7 +676,7 @@ router.post('/fileupload', upload.single("file"), async function (req, res, next
     else { }
   }
 
-
+console.log(data);
   var documents = [
     data
   ];
@@ -684,7 +684,7 @@ router.post('/fileupload', upload.single("file"), async function (req, res, next
   const results = await poller.pollUntilDone();
   var Dated = "";
   for await (const result of results) {
-
+    console.log(result);
 
     if (!result.error) {
       var TextName = "";
@@ -812,8 +812,8 @@ router.post('/fileuploadImage', uploadimage.single("file"), async function (req,
   res.json(success("Record Saved! We will update once Smart Report Gets Generated", { data: 1 }, res.statusCode))
   var printedTextSampleURL = req.file.url; // pdf/jpeg/png/tiff formats
 
-  const computerVisionKey = "f2dbc76f58874d1b8c87110eaefc55de";
-  const computerVisionEndPoint = "https://ayushmanocrdetectionpdf.cognitiveservices.azure.com/";
+  const computerVisionKey = "817c78b1b5d042f2a9077eb345ff7c96";
+  const computerVisionEndPoint = "https://ayushmanocrdetectionpdfs.cognitiveservices.azure.com/";
   const cognitiveServiceCredentials = new CognitiveServicesCredentials(computerVisionKey);
   const computerVisionClient = new ComputerVisionClient(cognitiveServiceCredentials, computerVisionEndPoint);
 
@@ -1308,8 +1308,8 @@ router.post('/fileuploadImagePrescriptions', uploadimage.single("file"), async f
   res.json(success("Record Saved! We will update once Smart Report Gets Generated", { data: 1 }, res.statusCode))
   var printedTextSampleURL = req.file.url; // pdf/jpeg/png/tiff formats
 
-  const computerVisionKey = "f2dbc76f58874d1b8c87110eaefc55de";
-  const computerVisionEndPoint = "https://ayushmanocrdetectionpdf.cognitiveservices.azure.com/";
+  const computerVisionKey = "817c78b1b5d042f2a9077eb345ff7c96";
+  const computerVisionEndPoint = "https://ayushmanocrdetectionpdfs.cognitiveservices.azure.com/";
   const cognitiveServiceCredentials = new CognitiveServicesCredentials(computerVisionKey);
   const computerVisionClient = new ComputerVisionClient(cognitiveServiceCredentials, computerVisionEndPoint);
 
