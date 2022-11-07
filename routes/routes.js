@@ -2095,6 +2095,21 @@ router.post('/labtest/getOrdersSummary', async (req, res) => {
 
 });
 
+router.post('/abha/getToken', async (req, res) => {
+ 
 
+var  clientId= "SBX_001797";
+var clientSecret="59f20f08-e0e6-4f59-99b8-ffd65ecf70d0";
+
+   axios.post('https://dev.abdm.gov.in/gateway/v0.5/sessions', { clientId:clientId,clientSecret:clientSecret})
+  .then(function (data) {
+    res.json(success(data.data.response, { data:data.data}, res.statusCode))
+
+  }
+  )
+
+
+
+});
 
 module.exports = router;
