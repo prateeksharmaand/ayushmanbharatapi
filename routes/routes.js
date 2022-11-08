@@ -2024,6 +2024,20 @@ router.post('/labtest/Addbeni',  async  (req, res) => {
   });
 
 })
+
+router.get('/labtest/Getbeni/:baniid', async (req, res) => {
+  var baniid=req.params.baniid
+  BenificiariesSchema.aggregate([
+
+    { $match: { baniid: Number(baniid) } },
+    
+  ]).exec(function (err, students) {
+
+   
+    res.json(success("OK", { data: students }, res.statusCode))
+  });
+
+})
 router.get('/labtest/getOrders/:userId', async (req, res) => {
 
   const userId = req.params.userId

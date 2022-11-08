@@ -22,7 +22,21 @@ const benificiariesSchema = new mongoose.Schema({
         type: String
     },
 
-   
+    abhaid:{
+        type: String
+    },
+    abhanumber:{
+        type: String
+    },
+    qrurl:{
+        type: String
+    },
+    token:{
+        type: String
+    },
+    refreshToken:{
+        type: String
+    },
    
 })
 
