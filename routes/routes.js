@@ -2025,7 +2025,7 @@ router.post('/labtest/Addbeni',  async  (req, res) => {
 
 })
 
-router.get('/labtest/Getbeni/:baniid', async (req, res) => {
+router.get('/labtest/GetbeniDetails/:baniid', async (req, res) => {
   var baniid=req.params.baniid
   BenificiariesSchema.aggregate([
 
