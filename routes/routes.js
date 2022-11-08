@@ -2126,14 +2126,14 @@ var clientSecret="59f20f08-e0e6-4f59-99b8-ffd65ecf70d0";
 
 
 });
-router.post('/addAbhaToBeni', uploadimage.single("file"), async function (req, res, next) {
+router.post('/addAbhaToBeni', async  (req, res)=> {
 
 console.log(req)
 
 
  //req.file.url,
  var myquery = { baniid: req.body.baniid };
- var newvalues = { $set: { abhaid:String(req.body.abhaid) ,abhanumber: String(req.body.abhanumber),qrurl: String(req.file.url),token: String(req.body.token),refreshToken: String(req.body.refreshToken) } };
+ var newvalues = { $set: { abhaid:String(req.body.abhaid) ,abhanumber: String(req.body.abhanumber),token: String(req.body.token),refreshToken: String(req.body.refreshToken) } };
   BenificiariesSchema.findOneAndUpdate(myquery,
     newvalues,
     function (err, response) {
