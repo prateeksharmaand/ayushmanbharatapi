@@ -15,6 +15,10 @@ const benificiariesSchema = new mongoose.Schema({
         
         type: String
     },
+    lastname :{
+        
+        type: String
+    },
     age:{
         type: Number
     },
