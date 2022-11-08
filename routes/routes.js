@@ -2133,7 +2133,7 @@ console.log(req)
 
  //req.file.url,
  var myquery = { baniid: req.body.baniid };
- var newvalues = { $set: { abhaid:String(req.body.abhaid) ,abhanumber: String(req.body.abhanumber),qrurl: String(req.body.qrurl) } };
+ var newvalues = { $set: { abhaid:String(req.body.abhaid) ,abhanumber: String(req.body.abhanumber),qrurl: String(req.file.url),token: String(req.body.token),refreshToken: String(req.body.refreshToken) } };
   BenificiariesSchema.findOneAndUpdate(myquery,
     newvalues,
     function (err, response) {
