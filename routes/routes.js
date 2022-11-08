@@ -2004,6 +2004,7 @@ router.post('/labtest/Addbeni',  async  (req, res) => {
     beniname: req.body.beniname,
     age: req.body.age,
     gender: req.body.gender,
+    lastname:req.body.lastname
     
 
   })
