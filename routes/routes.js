@@ -2126,5 +2126,28 @@ var clientSecret="59f20f08-e0e6-4f59-99b8-ffd65ecf70d0";
 
 
 });
+router.post('/addAbhaToBeni', uploadimage.single("file"), async function (req, res, next) {
 
+console.log(req)
+
+
+ //req.file.url,
+ var myquery = { baniid: req.body.baniid };
+ var newvalues = { $set: { abhaid:String(req.body.abhaid) ,abhanumber: String(req.body.abhanumber),qrurl: String(req.body.qrurl) } };
+  BenificiariesSchema.findOneAndUpdate(myquery,
+    newvalues,
+    function (err, response) {
+      // do something
+    });
+
+
+
+
+
+
+
+  res.json(success("Synced To Your Profile Successfully", { data: 1 }, res.statusCode))
+ 
+
+})
 module.exports = router;
