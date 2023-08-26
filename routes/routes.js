@@ -112,7 +112,7 @@ router.post('/user/post', async (req, res) => {
 
     const authtoken = jwt.sign(
       { userId: data.userId },
-      "1966010408",
+      process.env.TOKEN_KEY,
       {
         expiresIn: "2h",
       }
@@ -122,7 +122,7 @@ router.post('/user/post', async (req, res) => {
 
     const refreshtoken = jwt.sign(
       { userId: data.userId },
-      "8682236841",
+      process.env.REFRESH_TOKEN_PRIVATE_KEY,
       { expiresIn: "90d" }
   );
 
@@ -738,7 +738,7 @@ router.get('/vitaldetails/updateVitalValue/:mraiId/:testvalue/:testname',auth, a
 
 })
 router.post('/vitaldetails/addnewLabVital', auth, async  (req, res) => {
-  const decoded = jwt.verify(req.header('x-access-token'), "1966010408";  
+  const decoded = jwt.verify(req.header('x-access-token'), "1966010408");  
   var userId = decoded.userId 
  var recordId=req.body.recordId
  var data=req.body.data
@@ -1099,7 +1099,7 @@ router.post('/majorvitals/post',auth, async (req, res) => {
 
 
 router.get('/smartHealth/GetSmartHealthAnalysis',auth, async (req, res) => {
-  const decoded = jwt.verify(req.header('x-access-token'), "1966010408";  
+  const decoded = jwt.verify(req.header('x-access-token'), "1966010408");  
   var userId = decoded.userId 
 
 
