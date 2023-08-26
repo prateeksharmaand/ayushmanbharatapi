@@ -35,6 +35,14 @@ const userSchema = new mongoose.Schema({
         
         type: String
     },
+    authtoken :{
+        
+        type: String
+    },
+    refreshtoken :{
+        
+        type: String
+    },
    
 })
 

@@ -15,8 +15,8 @@ const MajorVitalsSchema = require('../models/majorvitals');
 const BenificiariesSchema = require('../models/benificiaries');
 const LaborderdetailsSchema = require('../models/laborderdetails');
 const ReferalsSchema = require('../models/referals');
-
-
+const auth = require("../middleware/auth");
+const jwt = require("jsonwebtoken");
 
 const sleep = require('util').promisify(setTimeout);
 
@@ -85,314 +85,9 @@ function GetRandomId(min, max) {
     Math.random() * (max - min) + min
   )
 }
-function GetDistance(lat1, long1, lat2, long2) {
 
-  var point1 = { lat: lat1, lng: long1 }
 
-  //Second point in your haversine calculation
-  var point2 = { lat: lat2, lng: long2 }
 
-  var haversine_m = haversine(point1, point2); //Results in meters (default)
-  var haversine_km = haversine_m / 1000; //Results in kilometers
-
-  return haversine_km;
-}
-
-Array.prototype.sortAttr = function (attr, reverse) {
-  var sorter = function (a, b) {
-    var aa = a[attr];
-    var bb = b[attr];
-    if (aa + 0 == aa && bb + 0 == bb) return aa - bb; // numbers
-    else return aa.localeCompare(bb); // strings
-  }
-  this.sort(function (a, b) {
-    var result = sorter(a, b);
-    if (reverse) result *= -1;
-    return result;
-  });
-};
-Array.prototype.sortAttrViews = function (attr, reverse) {
-  var sorter = function (a, b) {
-    var aa = a[attr];
-    var bb = b[attr];
-    if (aa + 0 == aa && bb + 0 == bb) return aa - bb; // numbers
-    else return aa.localeCompare(bb); // strings
-  }
-  this.sort(function (a, b) {
-    var result = sorter(b, a);
-    if (reverse) result *= -1;
-    return result;
-  });
-};
-
-router.post('/post', async (req, res) => {
-  const posts = new Model({
-    categoryId: req.body.categoryId,
-    postId: GetRandomId(10000, 1000000),
-    title: req.body.title,
-    isAnonymous: req.body.isAnonymous,
-    postViews: 0,
-    userId: req.body.userId,
-    latitude: req.body.latitude,
-    longitude: req.body.longitude,
-    postType: req.body.postType,
-    subCategories: req.body.subCategories,
-    categoryName: req.body.categoryName,
-
-    dateTimeStamp: new Date(),
-    imageUrl: req.body.imageUrl,
-
-  })
-
-
-
-
-  try {
-
-
-
-    const dataToSave = await posts.save();
-
-    var userTokens = [];
-
-    await UserModel.find({}, { "token": 1, "_id": 0 }).exec(function (err, result) {
-      if (err) throw err;
-      result.forEach(results => {
-
-        if (typeof results.token === 'undefined') {
-          //Variable isn't defined
-        }
-        else {
-          var message = {
-            data: {
-              postId: dataToSave.postId.toString(),
-              title: dataToSave.postType == 1 ? "Genaral question asked" : dataToSave.postType == 2 ? "Nearby help" : "Urgent Help needed",
-              desc: dataToSave.title,
-              type: dataToSave.categoryId,
-              imgUrl: ''
-
-
-            },
-
-
-          };
-          userTokens.push(results.token)
-          FCM.sendToMultipleToken(message, userTokens, function (err, response) {
-            if (err) {
-              console.log('err--', err);
-            } else {
-              console.log('response-----', response);
-            }
-
-          })
-
-        }
-      });
-
-    });
-
-
-  }
-  catch (error) {
-
-  }
-
-  res.json(success("Post saved", { data: "0" }, res.statusCode))
-})
-
-
-router.get('/Posts/GetAllPosts/:userId/:latitude/:longitude', async (req, res) => {
-  Model.aggregate([
-
-    {
-      $lookup: {
-        from: "users",
-        localField: "userId",
-        foreignField: "userId",
-        as: "users"
-      },
-
-    },
-
-    {
-      $unwind: '$users'
-    }
-    , {
-      $project: {
-        _id: 0, "users.image": 1, "users.userId": 1, "postId": 1, "title": 1, "isAnonymous": 1,
-
-        "postViews": 1, "latitude": 1, "longitude": 1, "postType": 1, "categoryName": 1,
-        "subCategories": 1, "dateTimeStamp": 1, "users.name": 1, "isLiked": 1, "imageUrl": 1
-      }
-    }
-  ]).exec(function (err, students) {
-
-    students.forEach(result => {
-      const unixTime = result.dateTimeStamp;
-      const date = new Date(unixTime);
-      result.ago = moment(date, "YYYY-MM-DD HH:mm:ss").fromNow();
-      result.distance = GetDistance(result.latitude, result.longitude, req.params.latitude, req.params.longitude);
-
-    });
-    students.sortAttr("distance")
-    res.json(success("OK", { data: students }, res.statusCode))
-
-  });
-
-
-
-});
-
-router.get('/Posts/GetAllTrendingPosts/:userId/:latitude/:longitude', async (req, res) => {
-  Model.aggregate([{
-    $lookup: {
-      from: "users",
-      localField: "userId",
-      foreignField: "userId",
-      as: "users"
-    },
-
-  },
-
-  {
-    $unwind: '$users'
-  }
-    , {
-    $project: {
-      _id: 0, "users.image": 1, "users.userId": 1, "postId": 1, "title": 1, "isAnonymous": 1,
-
-      "postViews": 1, "latitude": 1, "longitude": 1, "postType": 1, "categoryName": 1,
-      "subCategories": 1, "dateTimeStamp": 1, "users.name": 1, "isLiked": 1, "imageUrl": 1
-    }
-  }
-  ]).exec(function (err, students) {
-
-    students.forEach(result => {
-      const unixTime = result.dateTimeStamp;
-      const date = new Date(unixTime);
-      result.ago = moment(date, "YYYY-MM-DD HH:mm:ss").fromNow();
-      result.distance = GetDistance(result.latitude, result.longitude, req.params.latitude, req.params.longitude);
-
-    });
-    students.sortAttrViews("postViews")
-    res.json(success("OK", { data: students }, res.statusCode))
-  });
-});
-
-
-router.get('/Posts/GetAllWhatisPosts/:userId/:latitude/:longitude', async (req, res) => {
-  Model.aggregate([
-
-    { $match: { categoryId: "123251" } },
-    {
-
-      $lookup: {
-        from: "users",
-        localField: "userId",
-        foreignField: "userId",
-        as: "users"
-      },
-
-    },
-
-    {
-      $unwind: '$users'
-    }
-    , {
-      $project: {
-        _id: 0, "users.image": 1, "users.userId": 1, "postId": 1, "title": 1, "isAnonymous": 1,
-
-        "postViews": 1, "latitude": 1, "longitude": 1, "postType": 1, "categoryName": 1,
-        "subCategories": 1, "dateTimeStamp": 1, "users.name": 1, "isLiked": 1, "imageUrl": 1
-      }
-    }
-  ]).exec(function (err, students) {
-
-    students.forEach(result => {
-      const unixTime = result.dateTimeStamp;
-      const date = new Date(unixTime);
-      result.ago = moment(date, "YYYY-MM-DD HH:mm:ss").fromNow();
-      result.distance = GetDistance(result.latitude, result.longitude, req.params.latitude, req.params.longitude);
-
-    });
-    students.sortAttrViews("postViews")
-    res.json(success("OK", { data: students }, res.statusCode))
-  });
-
-})
-router.get('/Posts/GetPost/:userId/:postId', async (req, res) => {
-
-  const posts = req.params.postId
-  Model.aggregate([
-
-    { $match: { postId: Number(posts) } },
-    {
-
-      $lookup: {
-        from: "users",
-        localField: "userId",
-        foreignField: "userId",
-        as: "users"
-      },
-
-    },
-
-    {
-      $unwind: '$users'
-    }
-    , {
-      $project: {
-        _id: 0, "users.image": 1, "users.userId": 1, "postId": 1, "title": 1, "isAnonymous": 1,
-
-        "postViews": 1, "latitude": 1, "longitude": 1, "postType": 1, "categoryName": 1,
-        "subCategories": 1, "dateTimeStamp": 1, "users.name": 1, "isLiked": 1, "imageUrl": 1
-      }
-    }
-  ]).exec(function (err, students) {
-
-    students.forEach(result => {
-      const unixTime = result.dateTimeStamp;
-      const date = new Date(unixTime * 1000);
-      result.ago = moment(date, "YYYY-MM-DD HH:mm:ss").fromNow();
-
-
-    });
-    res.json(success("OK", { data: students }, res.statusCode))
-  });
-
-})
-router.get('/getPostLike/:postId/:userId', async (req, res) => {
-  try {
-
-    const data = await LikesModel.findOne({ postId: req.params.postId, userId: req.params.userId });
-    console.log(req.params.postId, req.params.userId)
-    if (data == null) {
-      res.json(success("Ok", { data: 0 }, res.statusCode))
-    }
-    else {
-      res.json(success("Ok", { data: 1 }, res.statusCode))
-    }
-
-  }
-  catch (errors) {
-    res.json(error("Something went wrong", res.statusCode))
-  }
-})
-
-
-//Update by ID Method
-router.get('/Posts/AddPostView/:postId', async (req, res) => {
-
-  Model.findOneAndUpdate({ postId: req.params.postId },
-    { $inc: { 'postViews': 1 } },
-    { new: true },
-    function (err, response) {
-      // do something
-    });
-  res.json(success("View Added ", { data: null }, res.statusCode))
-
-
-})
 
 
 //User Routes
@@ -414,6 +109,25 @@ router.post('/user/post', async (req, res) => {
 
   });
   if (user == null || user.length == 0) {
+
+    const authtoken = jwt.sign(
+      { userId: data.userId },
+      process.env.TOKEN_KEY,
+      {
+        expiresIn: "2h",
+      }
+    );
+    data.authtoken=authtoken
+   
+
+    const refreshtoken = jwt.sign(
+      { userId: data.userId },
+      process.env.REFRESH_TOKEN_PRIVATE_KEY,
+      { expiresIn: "90d" }
+  );
+
+data.refreshtoken=refreshtoken
+
     const dataToSave = await data.save();
 
     if(referedBy != null &&referedBy!=0)
@@ -444,9 +158,11 @@ router.post('/user/post', async (req, res) => {
 })
 
 
-router.get('/User/UpdateToken/:userId/:token', async (req, res) => {
+router.get('/User/UpdateToken/:token', auth, async (req, res) => {
 
-  var myquery = { userId: req.params.userId };
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
+  var userId = decoded.userId  
+  var myquery = { userId: userId };
   var newvalues = { $set: { token: req.params.token } };
   UserModel.findOneAndUpdate(myquery,
     newvalues,
@@ -457,9 +173,10 @@ router.get('/User/UpdateToken/:userId/:token', async (req, res) => {
 
 
 })
-router.get('/User/UpdateMobile/:userId/:mobile', async (req, res) => {
-
-  var myquery = { userId: req.params.userId };
+router.get('/User/UpdateMobile/:mobile',auth, async (req, res) => {
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
+  var userId = decoded.userId  
+  var myquery = { userId: userId };
   var newvalues = { $set: { mobile: req.params.mobile } };
   UserModel.findOneAndUpdate(myquery,
     newvalues,
@@ -472,9 +189,10 @@ router.get('/User/UpdateMobile/:userId/:mobile', async (req, res) => {
 })
 
 
-router.post('/User/UpdateProfile', async (req, res) => {
+router.post('/User/UpdateProfile', auth,async (req, res) => {
 
-  var userId = { userId: req.body.userId };
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
+  var userId = decoded.userId  
 
   var newvalues = { $set: { name: req.body.name, image: req.body.image } };
   UserModel.findOneAndUpdate(Number(userId),
@@ -496,155 +214,22 @@ router.post('/User/UpdateProfile', async (req, res) => {
 
 //likes Routes 
 
-router.post('/likes/post', async (req, res) => {
-
-  const source = await LikesModel.findOne({
-    postId: req.body.postId,
-    userId: req.body.userId
-
-  });
-
-  if (source == null) {
-    var user = new LikesModel(req.body)
-    user.subCategoryId = GetRandomId(10000, 1000000),
-      await user.save();
-    res.json(success("Liked Successfully", { data: "1" }, res.statusCode))
-  }
-  else {
-    const id = source._id;
-    const data = await LikesModel.findByIdAndDelete(id)
-    res.json(success("Unliked", { data: "0" }, res.statusCode))
-
-  }
-
-});
-
-
-
-router.post('/AddWhatIsPost', upload.single("file"), async function (req, res, next) {
-  console.log(req.file)
-  const posts = new Model({
-    categoryId: req.body.categoryId,
-    postId: GetRandomId(10000, 1000000),
-    title: req.body.title,
-    isAnonymous: req.body.isAnonymous,
-    postViews: 0,
-    userId: req.body.userId,
-    latitude: req.body.latitude,
-    longitude: req.body.longitude,
-    postType: req.body.postType,
-    subCategories: req.body.subCategories,
-    categoryName: req.body.categoryName,
-
-    dateTimeStamp: new Date(),
-    imageUrl: req.file.url,
-
-  })
-  try {
-
-
-
-    const dataToSave = await posts.save();
-
-    var userTokens = [];
-
-    await UserModel.find({}, { "token": 1, "_id": 0 }).exec(function (err, result) {
-      if (err) throw err;
-      result.forEach(results => {
-
-        if (typeof results.token === 'undefined') {
-          //Variable isn't defined
-        }
-        else {
-          var message = {
-            data: {
-              postId: dataToSave.postId.toString(),
-              title: dataToSave.postType == 1 ? "Genaral question asked" : dataToSave.postType == 2 ? "Nearby help" : "Urgent Help needed",
-              desc: dataToSave.title,
-              type: dataToSave.categoryId,
-              imgUrl: dataToSave.imageUrl.toString()
-
-
-            },
-
-
-          };
-          userTokens.push(results.token)
-          console.log(message)
-          FCM.sendToMultipleToken(message, userTokens, function (err, response) {
-            if (err) {
-              //  console.log('err--', err);
-            } else {
-              //console.log('response-----', response);
-            }
-
-          })
-
-        }
-      });
-
-    });
-
-
-  }
-  catch (error) {
-
-  }
-
-  res.json(success("Post saved", { data: "0" }, res.statusCode))
-
-});
-router.post('/AddCommentImage', upload.single("file"), async function (req, res, next) {
-  console.log(req.file)
-
-
-  res.json(success("Image Uploaded", { data: req.file.url, }, res.statusCode))
-
-});
-
-
-router.get('/getSubCategories/:categoryId', async (req, res) => {
-
-  const categoryId = req.params.categoryId
-
-
-  try {
-
-    const data = await SubCategoryModel.find({ categoryId: Number(categoryId) });
-
-
-    res.json(success("Ok", { data: data }, res.statusCode))
-  }
-  catch (errors) {
-    res.json(error("Something went wrong", res.statusCode))
-  }
-})
-
-router.post('/subCategories/post', async (req, res) => {
-
-
-  var user = new SubCategoryModel(req.body)
-  await user.save();
-  res.json(success("OsubCategories Added", { data: "1" }, res.statusCode))
 
 
 
 
-});
+router.post('/fileupload', upload.single("file"),auth, async function (req, res, next) {
 
 
-
-router.post('/fileupload', upload.single("file"), async function (req, res, next) {
-
-
-
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
+  var userId = decoded.userId  
 
   const medicalrecordModel = new MedicalRecordModel({
     recordId: GetRandomId(10000, 1000000),
     dateTimeStamp: new Date(),
     fileUrl: req.file.url,
     fileType: 1,
-    userId: req.body.userId,
+    userId: userId,
     smartReport: 0
 
   })
@@ -794,9 +379,10 @@ console.log(data);
 
 
 })
-router.post('/fileuploadImage', uploadimage.single("file"), async function (req, res, next) {
+router.post('/fileuploadImage', uploadimage.single("file"),auth, async function (req, res, next) {
 
-
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
+  var userId = decoded.userId  
 
 
   const medicalrecordModel = new MedicalRecordModel({
@@ -804,7 +390,7 @@ router.post('/fileuploadImage', uploadimage.single("file"), async function (req,
     dateTimeStamp: new Date(),
     fileUrl: req.file.url,
     fileType: 2,
-    userId: req.body.userId,
+    userId: userId,
     smartReport: 0
 
   })
@@ -1011,9 +597,9 @@ async function readTextFromURL(client, url) {
 
 
 
-router.get('/medicalreport/GetReport/:userId', async (req, res) => {
-
-  const userId = req.params.userId
+router.get('/medicalreport/GetReport', auth, async (req, res) => {
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
+  var userId = decoded.userId  
   MedicalRecordModel.aggregate([
 
     { $match: { userId: Number(userId) } },
@@ -1032,7 +618,10 @@ router.get('/medicalreport/GetReport/:userId', async (req, res) => {
   });
 
 })
-router.get('/medicalreport/GetSmartReport/:recordId', async (req, res) => {
+router.get('/medicalreport/GetSmartReport/:recordId', auth,async (req, res) => {
+
+
+
   const recordId = req.params.recordId
 
   MedicalRecordAIModel.aggregate([
@@ -1099,7 +688,7 @@ router.get('/medicalreport/GetSmartReport/:recordId', async (req, res) => {
 
 
 
-router.post('/vitaldetails/post', async (req, res) => {
+router.post('/vitaldetails/post',auth, async (req, res) => {
 
 
   const posts = new VitalDetailsSchema({
@@ -1119,8 +708,9 @@ router.post('/vitaldetails/post', async (req, res) => {
 
 });
 
-router.get('/vitaldetails/getcharts/:userId/:vitalId', async (req, res) => {
-  const userId = req.params.userId
+router.get('/vitaldetails/getcharts/:vitalId',auth, async (req, res) => {
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
+  var userId = decoded.userId 
   const vitalId = req.params.vitalId
   try {
     MedicalRecordAIModel.aggregate([
@@ -1134,7 +724,7 @@ router.get('/vitaldetails/getcharts/:userId/:vitalId', async (req, res) => {
     res.json(error(errors.message, res.statusCode))
   }
 });
-router.get('/vitaldetails/updateVitalValue/:mraiId/:testvalue/:testname', async (req, res) => {
+router.get('/vitaldetails/updateVitalValue/:mraiId/:testvalue/:testname',auth, async (req, res) => {
 
   var myquery = { mraiId: Number(req.params.mraiId) };
   var newvalues = { $set: { testvalue: req.params.testvalue ,testname: req.params.testname} };
@@ -1147,10 +737,10 @@ router.get('/vitaldetails/updateVitalValue/:mraiId/:testvalue/:testname', async 
 
 
 })
-router.post('/vitaldetails/addnewLabVital',  async  (req, res) => {
-
+router.post('/vitaldetails/addnewLabVital', auth, async  (req, res) => {
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
+  var userId = decoded.userId 
  var recordId=req.body.recordId
- var userId=req.body.userId
  var data=req.body.data
  var Dated=req.body.dated
  console.log(data+"aa")
@@ -1290,7 +880,7 @@ router.post('/vitaldetails/addnewLabVital',  async  (req, res) => {
 
 
 })
-router.post('/fileuploadImagePrescriptions', uploadimage.single("file"), async function (req, res, next) {
+router.post('/fileuploadImagePrescriptions', uploadimage.single("file"),auth, async function (req, res, next) {
 
 
 
@@ -1492,7 +1082,7 @@ router.post('/fileuploadImagePrescriptions', uploadimage.single("file"), async f
 })
 
 
-router.post('/majorvitals/post', async (req, res) => {
+router.post('/majorvitals/post',auth, async (req, res) => {
 
 
   const posts = new MajorVitalsSchema({
@@ -1508,8 +1098,10 @@ router.post('/majorvitals/post', async (req, res) => {
 
 
 
-router.get('/smartHealth/GetSmartHealthAnalysis/:userId', async (req, res) => {
-  const userId = req.params.userId
+router.get('/smartHealth/GetSmartHealthAnalysis',auth, async (req, res) => {
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
+  var userId = decoded.userId 
+
 
   MajorVitalsSchema.aggregate([
   
@@ -1564,7 +1156,9 @@ router.get('/smartHealth/GetSmartHealthAnalysis/:userId', async (req, res) => {
 
 
 
-router.post('/vitaldetails/addHeartRate',  async  (req, res) => {
+router.post('/vitaldetails/addHeartRate',auth,  async  (req, res) => {
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
+  var userId = decoded.userId 
   const medicalRecordAIModel = new MedicalRecordAIModel({
     mraiId: GetRandomId(10000, 1000000),
     recordId:0,
@@ -1574,7 +1168,7 @@ router.post('/vitaldetails/addHeartRate',  async  (req, res) => {
     normalizedText: req.body.normalizedText,
     vitalId: req.body.vitalId,
     dated:req.body.dated,
-    userId:req.body.userId
+    userId:userId
 
   })
   medicalRecordAIModel.save()
@@ -1585,7 +1179,7 @@ router.post('/vitaldetails/addHeartRate',  async  (req, res) => {
 
 
 
- router.get('/getvitals/getvitalsByMajorVitalId/:majorVitalId', async (req, res) => {
+ router.get('/getvitals/getvitalsByMajorVitalId/:majorVitalId',auth, async (req, res) => {
   const majorVitalId = req.params.majorVitalId
 
  
@@ -1605,7 +1199,7 @@ router.post('/vitaldetails/addHeartRate',  async  (req, res) => {
 
 
 
- router.get('/labtest/getProviderToken/:providerId',  async  (req, res) => {
+ router.get('/labtest/getProviderToken/:providerId', auth, async  (req, res) => {
  var providerId=req.params.providerId
 if(providerId==1)
 {
@@ -1629,7 +1223,7 @@ axios.post('/Login/Login', {
 
 
 
- router.post('/labtest/gettests',  async  (req, res) => {
+ router.post('/labtest/gettests', auth, async  (req, res) => {
 
   var providerId=req.body.providerId
   var testtype=req.body.type
@@ -1776,7 +1370,7 @@ switch (testtype) {
 
   
  
-  router.post('/labtest/getAppontmentSlots',  async  (req, res) => {
+  router.post('/labtest/getAppontmentSlots', auth, async  (req, res) => {
 
       var providerId=req.body.providerId
       var pincode=req.body.Pincode
@@ -1813,7 +1407,7 @@ switch (testtype) {
 
 
 
-  router.post('/labtest/verifyPinCodeAvaiblity',  async  (req, res) => {
+  router.post('/labtest/verifyPinCodeAvaiblity',auth,  async  (req, res) => {
 
         var providerId=req.body.providerId
         var pincode=req.body.Pincode
@@ -1841,8 +1435,9 @@ switch (testtype) {
   
 
 
-  router.post('/labtest/bookLabTest',  async  (req, res) => {
-    var userId=req.body.userId
+  router.post('/labtest/bookLabTest', auth, async  (req, res) => {
+    const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
+  var userId = decoded.userId 
         var providerId=req.body.providerId
       
         var vendorApiKey=req.body.apiKey
@@ -1912,7 +1507,7 @@ switch (testtype) {
           const laborderdetails = new LaborderdetailsSchema({
             orderId:data.data.refOrderId,
            
-            userId:req.body.userId,
+            userId:userId,
 
 
              providerId:req.body.providerId,
@@ -1974,7 +1569,9 @@ switch (testtype) {
        }})
 
 
-  router.post('/vitaldetails/addCustomVitalRecords',  async  (req, res) => {
+  router.post('/vitaldetails/addCustomVitalRecords',auth,  async  (req, res) => {
+    const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
+  var userId = decoded.userId 
           const medicalRecordAIModel = new MedicalRecordAIModel({
             mraiId: GetRandomId(10000, 1000000),
             recordId:0,
@@ -1984,7 +1581,7 @@ switch (testtype) {
             normalizedText: req.body.normalizedText,
             vitalId: req.body.vitalId,
             dated:req.body.dated,
-            userId:req.body.userId,
+            userId:userId,
             majorVitalId: req.body.majorVitalId,
         
           })
@@ -1997,7 +1594,7 @@ switch (testtype) {
 
 
          
-router.post('/labtest/Addbeni',  async  (req, res) => {
+router.post('/labtest/Addbeni', auth, async  (req, res) => {
   const beniModel = new BenificiariesSchema({
     baniid: GetRandomId(10000, 1000000),
     beniUserId: req.body.beniUserId,
@@ -2012,7 +1609,7 @@ router.post('/labtest/Addbeni',  async  (req, res) => {
   res.json(success("beneficiary Added Successfully", { data: "1" }, res.statusCode))
  
  })
- router.get('/labtest/Getbeni/:beniUserId', async (req, res) => {
+ router.get('/labtest/Getbeni/:beniUserId',auth, async (req, res) => {
   var beniUserId=req.params.beniUserId
   BenificiariesSchema.aggregate([
 
@@ -2026,7 +1623,7 @@ router.post('/labtest/Addbeni',  async  (req, res) => {
 
 })
 
-router.get('/labtest/GetbeniDetails/:baniid', async (req, res) => {
+router.get('/labtest/GetbeniDetails/:baniid',auth, async (req, res) => {
   var baniid=req.params.baniid
   BenificiariesSchema.aggregate([
 
@@ -2039,9 +1636,10 @@ router.get('/labtest/GetbeniDetails/:baniid', async (req, res) => {
   });
 
 })
-router.get('/labtest/getOrders/:userId', async (req, res) => {
+router.get('/labtest/getOrders',auth, async (req, res) => {
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
+  var userId = decoded.userId 
 
-  const userId = req.params.userId
 
 
 
@@ -2060,7 +1658,8 @@ router.get('/labtest/getOrders/:userId', async (req, res) => {
     res.json(error(errors.message, res.statusCode))
   } 
 });
-router.post('/labtest/getOrdersSummary', async (req, res) => {
+router.post('/labtest/getOrdersSummary', auth,async (req, res) => {
+
   const orderId = req.body.orderId
   var providerId=req.body.providerId
       
@@ -2110,7 +1709,7 @@ router.post('/labtest/getOrdersSummary', async (req, res) => {
 
 });
 
-router.post('/abha/getToken', async (req, res) => {
+router.post('/abha/getToken',auth, async (req, res) => {
  
 
 var  clientId= "SBX_001797";
@@ -2126,7 +1725,7 @@ var clientSecret="59f20f08-e0e6-4f59-99b8-ffd65ecf70d0";
 
 
 });
-router.post('/addAbhaToBeni', async  (req, res)=> {
+router.post('/addAbhaToBeni',auth, async (req, res)=> {
 
 console.log(req)
 
@@ -2150,4 +1749,67 @@ console.log(req)
  
 
 })
+
+
+router.post('/generateAuthToken',auth,async (req,res) => {
+  
+  const refreshToken = req.body.refreshToken
+console.log(refreshToken)
+ 
+  if((refreshToken) ) {
+
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_PRIVATE_KEY, 
+      (err, decoded) => {
+          if (err) {
+
+              // Wrong Refesh Token
+              return  res.json(success("Wrong refresh Token", { data:null}, res.statusCode))
+          }
+          else {
+            const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
+            var userId = decoded.userId  
+            
+             
+              const authtoken = jwt.sign(
+                { userId: userId },
+                process.env.TOKEN_KEY,
+                {
+                  expiresIn: "2h",
+                }
+              );
+              const newRefreshtoken = jwt.sign(
+                { userId: userId },
+                process.env.REFRESH_TOKEN_PRIVATE_KEY,
+                { expiresIn: "90d" }
+            );
+            
+             var tokens={newAuthtoken:authtoken,newRefreshtoken: newRefreshtoken }
+          var myquery = { userId: userId};
+          var newvalues = { $set: { authtoken: authtoken,refreshtoken: newRefreshtoken } };
+          UserModel.findOneAndUpdate(myquery,
+            newvalues,
+            function (err, response) {
+              res.json(success("Auth Token Created", { data:tokens}, res.statusCode))
+            });
+          }
+      })
+
+
+
+
+
+
+
+
+
+
+
+   
+           
+  } else {
+      res.status(401).send('Invalid request')
+  }
+})
+
+
 module.exports = router;
