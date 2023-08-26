@@ -1758,7 +1758,7 @@ console.log(refreshToken)
  
   if((refreshToken) ) {
 
-    jwt.verify(refreshToken, REFRESH_TOKEN_PRIVATE_KEY, 
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_PRIVATE_KEY, 
       (err, decoded) => {
           if (err) {
 
@@ -1779,7 +1779,7 @@ console.log(refreshToken)
               );
               const newRefreshtoken = jwt.sign(
                 { userId: userId },
-                REFRESH_TOKEN_PRIVATE_KEY,
+                process.env.REFRESH_TOKEN_PRIVATE_KEY,
                 { expiresIn: "90d"}
             );
                
