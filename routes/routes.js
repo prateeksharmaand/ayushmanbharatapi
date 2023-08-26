@@ -731,7 +731,7 @@ router.get('/vitaldetails/updateVitalValue/:mraiId/:testvalue/:testname',auth, a
   MedicalRecordAIModel.findOneAndUpdate(myquery,
     newvalues,
     function (err, response) {
-      // do something
+     
     });
   res.json(success("Record Successfully Updated", { data: "1" }, res.statusCode))
 
@@ -743,7 +743,7 @@ router.post('/vitaldetails/addnewLabVital', auth, async  (req, res) => {
  var recordId=req.body.recordId
  var data=req.body.data
  var Dated=req.body.dated
- console.log(data+"aa")
+ 
  res.json(success("Record Added Updated", { data: "1" }, res.statusCode))
   var documents = [
     data
