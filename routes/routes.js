@@ -112,7 +112,7 @@ router.post('/user/post', async (req, res) => {
 
     const authtoken = jwt.sign(
       { userId: data.userId },
-      1966010408,
+      process.env.TOKEN_KEY,
       {
         expiresIn: "2h",
       }
@@ -122,7 +122,7 @@ router.post('/user/post', async (req, res) => {
 
     const refreshtoken = jwt.sign(
       { userId: data.userId },
-      8682236841,
+      process.env.REFRESH_TOKEN_PRIVATE_KEY,
       { expiresIn: "90d" }
   );
 
@@ -160,7 +160,7 @@ data.refreshtoken=refreshtoken
 
 router.get('/User/UpdateToken/:token', auth, async (req, res) => {
 
-  const decoded = jwt.verify(req.header('x-access-token'), 1966010408);  
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
   var userId = decoded.userId  
   var myquery = { userId: userId };
   var newvalues = { $set: { token: req.params.token } };
@@ -174,7 +174,7 @@ router.get('/User/UpdateToken/:token', auth, async (req, res) => {
 
 })
 router.get('/User/UpdateMobile/:mobile',auth, async (req, res) => {
-  const decoded = jwt.verify(req.header('x-access-token'), 1966010408);  
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
   var userId = decoded.userId  
   var myquery = { userId: userId };
   var newvalues = { $set: { mobile: req.params.mobile } };
@@ -191,7 +191,7 @@ router.get('/User/UpdateMobile/:mobile',auth, async (req, res) => {
 
 router.post('/User/UpdateProfile', auth,async (req, res) => {
 
-  const decoded = jwt.verify(req.header('x-access-token'), 1966010408);  
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
   var userId = decoded.userId  
 
   var newvalues = { $set: { name: req.body.name, image: req.body.image } };
@@ -221,7 +221,7 @@ router.post('/User/UpdateProfile', auth,async (req, res) => {
 router.post('/fileupload', upload.single("file"),auth, async function (req, res, next) {
 
 
-  const decoded = jwt.verify(req.header('x-access-token'), 1966010408);  
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
   var userId = decoded.userId  
 
   const medicalrecordModel = new MedicalRecordModel({
@@ -381,7 +381,7 @@ console.log(data);
 })
 router.post('/fileuploadImage', uploadimage.single("file"),auth, async function (req, res, next) {
 
-  const decoded = jwt.verify(req.header('x-access-token'), 1966010408);  
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
   var userId = decoded.userId  
 
 
@@ -598,7 +598,7 @@ async function readTextFromURL(client, url) {
 
 
 router.get('/medicalreport/GetReport', auth, async (req, res) => {
-  const decoded = jwt.verify(req.header('x-access-token'), 1966010408);  
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
   var userId = decoded.userId  
   MedicalRecordModel.aggregate([
 
@@ -709,7 +709,7 @@ router.post('/vitaldetails/post',auth, async (req, res) => {
 });
 
 router.get('/vitaldetails/getcharts/:vitalId',auth, async (req, res) => {
-  const decoded = jwt.verify(req.header('x-access-token'), 1966010408);  
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
   var userId = decoded.userId 
   const vitalId = req.params.vitalId
   try {
@@ -738,7 +738,7 @@ router.get('/vitaldetails/updateVitalValue/:mraiId/:testvalue/:testname',auth, a
 
 })
 router.post('/vitaldetails/addnewLabVital', auth, async  (req, res) => {
-  const decoded = jwt.verify(req.header('x-access-token'), 1966010408);  
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
   var userId = decoded.userId 
  var recordId=req.body.recordId
  var data=req.body.data
@@ -1099,7 +1099,7 @@ router.post('/majorvitals/post',auth, async (req, res) => {
 
 
 router.get('/smartHealth/GetSmartHealthAnalysis',auth, async (req, res) => {
-  const decoded = jwt.verify(req.header('x-access-token'), 1966010408);  
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
   var userId = decoded.userId 
 
 
@@ -1157,7 +1157,7 @@ router.get('/smartHealth/GetSmartHealthAnalysis',auth, async (req, res) => {
 
 
 router.post('/vitaldetails/addHeartRate',auth,  async  (req, res) => {
-  const decoded = jwt.verify(req.header('x-access-token'), 1966010408);  
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
   var userId = decoded.userId 
   const medicalRecordAIModel = new MedicalRecordAIModel({
     mraiId: GetRandomId(10000, 1000000),
@@ -1436,7 +1436,7 @@ switch (testtype) {
 
 
   router.post('/labtest/bookLabTest', auth, async  (req, res) => {
-    const decoded = jwt.verify(req.header('x-access-token'), 1966010408);  
+    const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
   var userId = decoded.userId 
         var providerId=req.body.providerId
       
@@ -1570,7 +1570,7 @@ switch (testtype) {
 
 
   router.post('/vitaldetails/addCustomVitalRecords',auth,  async  (req, res) => {
-    const decoded = jwt.verify(req.header('x-access-token'), 1966010408);  
+    const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
   var userId = decoded.userId 
           const medicalRecordAIModel = new MedicalRecordAIModel({
             mraiId: GetRandomId(10000, 1000000),
@@ -1637,7 +1637,7 @@ router.get('/labtest/GetbeniDetails/:baniid',auth, async (req, res) => {
 
 })
 router.get('/labtest/getOrders',auth, async (req, res) => {
-  const decoded = jwt.verify(req.header('x-access-token'), 1966010408);  
+  const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
   var userId = decoded.userId 
 
 
@@ -1758,7 +1758,7 @@ console.log(refreshToken)
  
   if((refreshToken) ) {
 
-    jwt.verify(refreshToken, 8682236841, 
+    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_PRIVATE_KEY, 
       (err, decoded) => {
           if (err) {
 
@@ -1766,20 +1766,20 @@ console.log(refreshToken)
               return  res.json(success("Wrong refresh Token", { data:null}, res.statusCode))
           }
           else {
-            const decoded = jwt.verify(req.header('x-access-token'), 1966010408);  
+            const decoded = jwt.verify(req.header('x-access-token'), process.env.TOKEN_KEY);  
             var userId = decoded.userId  
             
              
               const authtoken = jwt.sign(
                 { userId: userId },
-                1966010408,
+                process.env.TOKEN_KEY,
                 {
                   expiresIn: "2h",
                 }
               );
               const newRefreshtoken = jwt.sign(
                 { userId: userId },
-                8682236841,
+                process.env.REFRESH_TOKEN_PRIVATE_KEY,
                 { expiresIn: "90d" }
             );
             
