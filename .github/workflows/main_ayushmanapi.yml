@@ -4,10 +4,6 @@ on:
       - main
   workflow_dispatch:
 
-env: # <--- here
-  TOKEN_KEY: ${{secrets.TOKEN_KEY}} 
-  REFRESH_TOKEN_PRIVATE_KEY: ${{secrets.REFRESH_TOKEN_PRIVATE_KEY}} 
-
 
 jobs:
   build:
