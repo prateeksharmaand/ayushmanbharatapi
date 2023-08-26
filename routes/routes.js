@@ -114,7 +114,7 @@ router.post('/user/post', async (req, res) => {
       { userId: data.userId },
       process.env.TOKEN_KEY,
       {
-        expiresIn: "240",
+        expiresIn: "2h",
       }
     );
     data.authtoken=authtoken
@@ -1774,7 +1774,7 @@ console.log(refreshToken)
                 { userId: userId },
                 process.env.TOKEN_KEY,
                 {
-                  expiresIn: "240",
+                  expiresIn: "2h",
                 }
               );
               const newRefreshtoken = jwt.sign(
