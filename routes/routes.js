@@ -1780,9 +1780,9 @@ console.log(refreshToken)
               const newRefreshtoken = jwt.sign(
                 { userId: userId },
                 "8682236841",
-                { expiresIn: "90d" }
+                { expiresIn: "90d"}
             );
-            
+               
              var tokens={newAuthtoken:authtoken,newRefreshtoken: newRefreshtoken }
           var myquery = { userId: userId};
           var newvalues = { $set: { authtoken: authtoken,refreshtoken: newRefreshtoken } };
@@ -1793,19 +1793,6 @@ console.log(refreshToken)
             });
           }
       })
-
-
-
-
-
-
-
-
-
-
-
-   
-           
   } else {
       res.status(401).send('Invalid request')
   }
