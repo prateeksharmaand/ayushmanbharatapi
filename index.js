@@ -11,7 +11,8 @@ dotenv.config();
 
 //const mongoString ="mongodb+srv://proacdoc:kioe6u1gXsM8eTMA@cluster0.wcsupz7.mongodb.net/?appName=Cluster0";
 
-const mongoString = "mongodb+srv://proacdoc:kioe6u1gXsM8eTMA@cluster0.wcsupz7.mongodb.net/proacdoc?retryWrites=true&w=majority";
+//const mongoString = "mongodb+srv://proacdoc:kioe6u1gXsM8eTMA@cluster0.wcsupz7.mongodb.net/proacdoc?retryWrites=true&w=majority";
+const mongoString = "mongodb+srv://proacdoc:kioe6u1gXsM8eTMA@cluster0.wcsupz7.mongodb.net/";
 
 
 mongoose.connect(mongoString,{useNewUrlParser: true, useUnifiedTopology: true},{ poolSize: 10 });
@@ -35,10 +36,10 @@ const routes = require('./routes/routes');
 app.use('/api', routes)
 
 
-app.listen(port = 8080, () => {
+app.listen(port = process.env.PORT, () => {
    
 
-    console.log(`Server Started at ${3001}`)
+    console.log(`Server Started at ${process.env.PORT}`)
    
    
 })
