@@ -14,7 +14,7 @@ dotenv.config();
 const mongoString = "mongodb+srv://proacdoc:kioe6u1gXsM8eTMA@cluster0.wcsupz7.mongodb.net/proacdoc?retryWrites=true&w=majority";
 
 
-mongoose.connect(mongoString,{ poolSize: 10 });
+mongoose.connect(mongoString,{useNewUrlParser: true, useUnifiedTopology: true},{ poolSize: 10 });
 const database = mongoose.connection;
 
 database.on('error', (error) => {
