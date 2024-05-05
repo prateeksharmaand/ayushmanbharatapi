@@ -9,7 +9,9 @@ const dotenv = require('dotenv');
  
 dotenv.config();
 
-const mongoString ="mongodb+srv://proacdoc1:Es9y31kTYZ0XDYEp@cluster0.wcsupz7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+//const mongoString ="mongodb+srv://proacdoc:kioe6u1gXsM8eTMA@cluster0.wcsupz7.mongodb.net/?appName=Cluster0";
+
+const mongoString = "mongodb+srv://proacdoc:kioe6u1gXsM8eTMA@cluster0.wcsupz7.mongodb.net/proacdoc?retryWrites=true&w=majority";
 
 
 mongoose.connect(mongoString,{ poolSize: 10 });
@@ -44,3 +46,4 @@ app.listen(port = process.env.PORT, () => {
 /* app.listen( process.env.PORT, () => {
     console.log(`Server Started at ${3000}`) 
 }) */
+  
