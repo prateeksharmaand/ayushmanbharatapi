@@ -9,7 +9,7 @@ const dotenv = require('dotenv');
  
 dotenv.config();
 
-const mongoString ="mongodb+srv://prateek:V9z1ntUKFeosJLK5@cluster0.aiuci.mongodb.net/proacdoc?retryWrites=true&w=majority";
+const mongoString ="mongodb+srv://proacdoc1:Es9y31kTYZ0XDYEp@cluster0.wcsupz7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 
 
 mongoose.connect(mongoString,{ poolSize: 10 });
