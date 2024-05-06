@@ -18,7 +18,7 @@ const mongoString = "mongodb+srv://proacdoc:kioe6u1gXsM8eTMA@cluster0.wcsupz7.mo
 
 
 
-/* mongoose.connect(mongoString,{useNewUrlParser: true, useUnifiedTopology: true},{ poolSize: 10 });
+mongoose.connect(mongoString,{useNewUrlParser: true, useUnifiedTopology: true},{ poolSize: 10 });
 const database = mongoose.connection;
 
 database.on('error', (error) => {
@@ -27,7 +27,7 @@ database.on('error', (error) => {
 
 database.once('connected', () => {
     console.log('Database Connected');
-}) */   
+}) 
 const app = express();
 app.use(compression({level:6}));
 
@@ -39,7 +39,7 @@ const routes = require('./routes/routes');
 app.use('/api', routes)
 
 
-app.listen(port = process.env.PORT, () => {
+app.listen(port = 8080, () => {
    
 
     console.log(`Server Started at ${3001}`)
