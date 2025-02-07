@@ -6,13 +6,13 @@ const compression = require('compression')
 const dotenv = require('dotenv');
 
 
- 
+  
 dotenv.config();
 
 //const mongoString ="mongodb+srv://proacdoc:kioe6u1gXsM8eTMA@cluster0.wcsupz7.mongodb.net/?appName=Cluster0";
 
 //const mongoString = "mongodb+srv://proacdoc:kioe6u1gXsM8eTMA@cluster0.wcsupz7.mongodb.net/proacdoc?retryWrites=true&w=majority";
-const mongoString = "mongodb+srv://proacdoc:kioe6u1gXsM8eTMA@cluster0.wcsupz7.mongodb.net/";
+const mongoString = "mongodb+srv://prateek:q8tM2KUlasIINLbr@cluster0.aiuci.mongodb.net/";
 
 
 
